@@ -1,13 +1,17 @@
+import { useState } from 'react';
 import './Square.css';
 
 type Props = {
-  value: number;
+  value?: number;
+  onClick: () => void;
 };
 
-const Square = ({ value }: Props) => {
+const Square = ({ value, onClick }: Props) => {
   return (
     <div>
-      <button className='square'>{value}</button>
+      <button className='square' onClick={onClick}>
+        {value}
+      </button>
     </div>
   );
 };
