@@ -37,6 +37,10 @@ const TicTacToe = (props: Props) => {
   const [stepNumber, setStepNumber] = useState(0);
 
   const handleClick = (i: number) => {
+    // This ensures that if we “go back in time” and then make a new move from that point,
+    // we throw away all the “future” history that would now be incorrect.
+    const localHistory = history.slice(0, stepNumber + 1);
+    const current = localHistory[localHistory.length - 1];
     const squares = current.squares.slice();
 
     // Check if a player has won already or the square is already filled
@@ -45,7 +49,8 @@ const TicTacToe = (props: Props) => {
     }
 
     squares[i] = currentPlayer();
-    setHistory(history.concat([{ squares: squares }]));
+    setHistory(localHistory.concat([{ squares: squares }]));
+    setStepNumber(localHistory.length);
     togglePlayer();
   };
 
@@ -57,14 +62,23 @@ const TicTacToe = (props: Props) => {
   const currentPlayer = () => (xIsNext ? 'X' : 'O');
   const togglePlayer = () => setXIsNext(!xIsNext);
 
-  const current = history[history.length - 1];
-
+  const current = history[stepNumber];
   const winner = calculateWinner(current.squares);
 
   let status = undefined;
 
   if (winner) status = 'Winner: ' + winner;
   else status = 'Next player: ' + (xIsNext ? 'X' : 'O');
+
+  const moves = history.map((step, move) => {
+    const desc = move ? 'Go to move #' + move : 'Go to game start';
+
+    return (
+      <li key={move}>
+        <button onClick={() => jumpTo(move)}>{desc}</button>
+      </li>
+    );
+  });
 
   return (
     <div>
@@ -75,7 +89,7 @@ const TicTacToe = (props: Props) => {
         </div>
         <div className='game-info'>
           <div className='status'>{status}</div>
-          <ol>{/* TODO */}</ol>
+          <ol>{moves}</ol>
         </div>
       </div>
     </div>
